@@ -67,7 +67,7 @@ def process_landmarks(face):
 
 
 PATH = "img/"
-NAME = "img4.jpg"
+NAME = "frinces.jpg"
 img = Image.open(PATH+NAME)
 
 facelist = detect_faces(img)
