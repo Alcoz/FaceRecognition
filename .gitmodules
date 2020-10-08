@@ -1,3 +1,6 @@
 [submodule "facenet_pytorch"]
 	path = facenet_pytorch
 	url = https://github.com/timesler/facenet-pytorch
+[submodule "openface"]
+	path = openface
+	url = https://github.com/cmusatyalab/openface

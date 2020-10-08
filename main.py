@@ -9,8 +9,9 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import argparse
 import sys
+from openface import openface
 
-def detect_faces(img):
+def detect_faces(img, NAME):
 
     mtcnn = MTCNN(image_size=256, margin=0, keep_all=True)
     # Get cropped and prewhitened image tensor
@@ -37,44 +38,50 @@ def process_landmarks(face):
 
     # Initialize dlib's face detector
     detector = dlib.get_frontal_face_detector()
+    predictor_model = "shape_predictor_68_face_landmarks.dat"
     # Detecting faces in the grayscale image
     rects = detector(gray, 1)
     # print(faces)
-    predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+    predictor = dlib.shape_predictor(predictor_model)
+    face_aligner = openface.AlignDlib(predictor_model)
 
-    for (i, rect) in enumerate(rects):
+    landmarks = None
+    for rect in rects:
         # We will determine the facial landmarks for the face region, then
         # can convert the facial landmark (x, y)-coordinates to a NumPy array
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
+        landmarks = shape
 
         # We then loop over the (x, y)-coordinates for the facial landmarks
         # and draw them on the image
         for (x, y) in shape:
-            cv2.circle(gray, (x, y), 2, (255, 255, 255), -1)
+            cv2.circle(gray, (x, y), 1, (255, 255, 255), -1)
 
-    # Now show the output image with the face detections as well as
-    # facial landmarks
+        alignedFace = face_aligner.align(256, gray, rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
+    
+        print(np.array(alignedFace).shape)
+        alignedFace = np.array(alignedFace)
 
-    array = np.array(gray)
-    print(np.shape(array))
-    img = Image.fromarray(array, 'L')
-
-    img.save(face)
-    img.show()
-    input("Press a key to continue...")
-    return shape
+        img = Image.fromarray(alignedFace, 'L')
+        img.save(face)
+        img.show()
+        input("Press a key to continue...")
+    # array = np.array(gray)
+    # img = Image.fromarray(array, 'L')
+    
+    return landmarks
 
 
 PATH = "img/"
-NAME = "frinces.jpg"
+NAME = "img3.jpg"
 img = Image.open(PATH+NAME)
 
-facelist = detect_faces(img)
+facelist = detect_faces(img, NAME)
 marks = []
 for face in facelist:
     marks.append(process_landmarks(face))
 
-# print(marks[0])
+# print(marks)
 
     
